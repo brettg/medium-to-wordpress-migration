@@ -341,21 +341,27 @@ function handleEmbeddedLinks(contentObj) {
     }
 }
 async function prepareSectionContent(sectionContainer, urlsMapping) {
+    // Logic get rid of header and author. If there is an image
+    // above those we need to remove it and add it back below.
     const $ = sectionContainer;
     const firstParaIndex = $.find("p").index();
     const firstFigureIndex = $.find("figure").index();
+    let headerImg;
     if (firstFigureIndex !== -1 && firstParaIndex > firstFigureIndex) {
-        $.find("figure").first().prevAll().remove();
-    } else {
-        $.find("p").first().prevAll().remove();
+      headerImg = $.find("figure").first().remove()
     }
+    $.find("p").first().prevAll().remove();
 
     const contentObj = cheerio.load($.find("p").first().parent().html());
+    if (headerImg) {
+      contentObj('body').prepend(headerImg)
+    }
     removeClassForAllElements(contentObj, contentObj('body'));
     handleUrls(contentObj, urlsMapping);
     handleEmbeddedLinks(contentObj);
     handleLineBreaks(contentObj);
     await handleFigures(contentObj);
+    contentObj("[srcset]").removeAttr("srcset")
     let sectionContent = replaceHTags(contentObj('body').html());
     sectionContent = replacePlaceHolders(sectionContent);
     return sectionContent;
