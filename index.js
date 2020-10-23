@@ -375,10 +375,14 @@ async function preparePostContent(postContainer, urlsMapping) {
     return replacePTags(htmlContent);
 }
 
+function prepareTitle($) {
+  return $("title").text().split('|')[0];
+}
+
 async function prepareWPPostJson(postDataHtml, urlsMapping) {
     const postJson = {};
     const $ = cheerio.load(postDataHtml);
-    postJson.title = [$("title").text().replace('- Tensult Blogs - Medium', '')];
+    postJson.title = [prepareTitle($)];
     const pubDateMatch = postDataHtml.match(/"datePublished"\s*:\s*"([^"]+)"/);
     if (pubDateMatch) {
         postJson.pubDate = [getDateInFormat(pubDateMatch[1], "ddd, DD MMM YYYY HH:mm:ss ZZ")]
@@ -389,7 +393,7 @@ async function prepareWPPostJson(postDataHtml, urlsMapping) {
     postJson['excerpt:encoded'] = [''];
     postJson['wp:status'] = ['publish'];
     postJson['wp:post_type'] = ['post'];
-    postJson.category = prepareCategory($);
+    //postJson.category = prepareCategory($);
     return postJson;
 }
 
@@ -399,7 +403,7 @@ async function prepareWPPostsJson(postUrls) {
     for (let postUrl of postUrls) {
         const postDataHtml = await fetchUrl(postUrl);
         const $ = cheerio.load(postDataHtml);
-        const title = $("title").text().replace('- Tensult Blogs - Medium', '');
+        const title = prepareTitle($);
         const newUrl = "/" + title.trim().toLowerCase()
             .replace(/\s+/g, '-')
             .replace(/[^-0-9a-z]/g, '');
