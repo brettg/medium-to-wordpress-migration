@@ -246,22 +246,15 @@ function replaceHTags(content) {
 function prepareCategory(postContainer) {
     const $ = postContainer;
     const category = [
-        {
-            "_": "Technology",
-            "$": {
-                "domain": "category",
-                "nicename": "technology"
-            }
-        }
     ];
 
-    $('li a[href*="/tag/"]').each((index, elm) => {
+    $('li a[href*="/tagged/"]').each((index, elm) => {
         tagVal = $(elm).text();
         category.push({
             "_": tagVal,
             "$": {
                 "domain": "post_tag",
-                "nicename": tagVal.toLowerCase()
+                "nicename": tagVal.toLowerCase().replace(/\s+/, '-')
             }
         });
     });
@@ -399,7 +392,7 @@ async function prepareWPPostJson(postDataHtml, urlsMapping) {
     postJson['excerpt:encoded'] = [''];
     postJson['wp:status'] = ['publish'];
     postJson['wp:post_type'] = ['post'];
-    //postJson.category = prepareCategory($);
+    postJson.category = prepareCategory($);
     return postJson;
 }
 
